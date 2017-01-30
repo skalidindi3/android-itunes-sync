@@ -1,0 +1,27 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$script = <<SCRIPT
+    sudo apt-get update
+    sudo apt-get upgrade
+    sudo apt-get install -y build-essential gcc-arm-linux-androideabi
+    cd shared
+    curl -SO https://download.samba.org/pub/rsync/rsync-3.1.2.tar.gz
+    tar -xvf rsync-3.1.2.tar.gz
+    rm rsync-3.1.2.tar.gz
+    cd rsync-3.1.2
+    ./configure --host=arm-linux-androideabi CFLAGS="-static"
+    make
+SCRIPT
+
+Vagrant.configure('2') do |config|
+    config.vm.box = 'trusty32' # Base box - Ubuntu 14.04.1 LTS Server (32 bit)
+    config.vm.box_url = 'http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-i386-vagrant-disk1.box'
+    config.vm.synced_folder 'shared', '/home/vagrant/shared', create: true
+    config.vm.provision "shell", inline: $script
+    # VirtualBox-specific settings
+    config.vm.provider 'virtualbox' do |vb|
+        vb.name = 'rsync-dev'
+        vb.customize ['modifyvm', :id, '--memory', '4096']
+    end
+end
