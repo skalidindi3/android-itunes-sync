@@ -1,5 +1,15 @@
-References
-----------
+TODOs
+-----
+* `rsync` command in `Makefile` to actually sync the song files
+* GUI?
+  * select playlists to sync
+* better iTunes library XML parsing?
+  * support certain Smart Playlists?
+    * Recently Added
+    * Top 25
+
+`rsync` Compilation References
+------------------------------
 
 Android:
 * http://ptspts.blogspot.com/2015/03/how-to-use-rsync-over-adb-on-android.html
