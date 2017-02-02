@@ -1,6 +1,5 @@
 TODOs
 -----
-* `rsync` command in `Makefile` to actually sync the song files
 * GUI?
   * select playlists to sync
 * better iTunes library XML parsing?
