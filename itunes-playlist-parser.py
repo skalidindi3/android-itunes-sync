@@ -97,6 +97,57 @@ if __name__ == "__main__":
         from IPython import embed
         print(info("Defined custom class PlaylistParser with instance `pp`..."))
         print("\n")
+
+        import mutagen
+        s = sorted(pp.getAudioTracksOfPlaylist("Recently Added"), key=lambda x: x["Date Added"], reverse=True)
+        fs = [urllib2.unquote(i["Location"]).decode("utf8")[7:] for i in s]
+        mfs = [mutagen.File(m) for m in fs]
+        mfsnp = [{k:v for k,v in mf.items() if k != u'APIC:'} for mf in mfs]
+        png_x = int(filter(lambda c: c.isdigit(), mfs[0][u'APIC:'].data.split("PixelXDimension")[1]))
+        known_tags = {
+            u'APIC:' : 'album art',
+            'TALB' : 'album',
+            'TCON' : 'genre',
+            'TDRC' : 'year',
+            'TIT2' : 'track',
+            'TPE1' : 'artist',
+            'TPOS' : 'disc#/total#',
+            'TRCK' : 'track#/total#',
+        }
+        opt_tags = {
+            'TPE2' : 'album artist', # Anderson Paak for NxWorries, etc
+            'TSOA' : 'sort album', # grab from album
+            'TSOP' : 'sort artist', # grab from artist
+            'TSOT' : 'sort track', # grab from track
+            'TSO2' : 'album artist', # grab from album artist (iTunes unofficial tag)
+            'TCMP' : 'compilation flag', # (iTunes unofficial tag)
+            'TSSE' : 'encoded with', # LAME, iTunes, etc
+            'TENC' : 'non-visible encoded with', # grab from encoded if no 'TSSE' key?
+            u'COMM::eng' : 'comments', # soundcloud, etc
+        }
+        ignore_tags = {
+            'TPE3' : 3, # artist repeat?
+            'TLAN' : 2, # language
+            'TPUB' : 4, # publisher
+            'TDRL' : 0, # release date (not record date)
+            'COMM:iTunNORM:eng' : 4,
+            'COMM:iTunPGAP:eng' : 4,
+            'COMM:iTunSMPB:eng' : 4,
+            'COMM:iTunes_CDDB_IDs:eng' : 4,
+        }
+        # http://id3.org/id3v2.4.0-frames
+        # http://id3.org/Developer%20Information
+
+        from collections import defaultdict
+        alltags = defaultdict(int)
+        for id3f in mfs:
+            for k in id3f.keys():
+                alltags[k] += 1
+        commontags = {k:v for k,v in alltags.items() if v == 100}
+
+        def findWithTag(tag):
+            return filter(lambda mf: mf.get(tag), mfsnp)
+
         embed()
     elif args.write_all:
         pp.writeAllPlaylists()
