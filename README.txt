@@ -1,5 +1,6 @@
 TODOs
 -----
+* make changelist to save a copy as changelist.txt during dry run
 * GUI?
   * select playlists to sync
 
