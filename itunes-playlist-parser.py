@@ -13,12 +13,25 @@ RESET="\033[0m"
 def info(text):
     return GREEN + text + RESET
 
-class SmartCriteria(object):
+class SmartPlaylist(object):
     """Define ordering for a subsection of smart playlists"""
-    pass
+
+    @staticmethod
+    def recentlyAdded(tracks, limit=None):
+        recent = sorted(tracks, key=lambda t: t["Date Added"], reverse=True)
+        if limit:
+            recent = recent[:limit]
+        return recent
+
+    @staticmethod
+    def mostPlayed(tracks, limit=50):
+        popular = sorted(tracks, key=lambda t: t.get("Play Count", 0), reverse=True)
+        if limit:
+            popular = popular[:limit]
+        return popular
 
 class PlaylistParser(object):
-    """Playlist files compatible with some music players on Android. Tested on Pulsar, BlackPlayer, Shuttle"""
+    """Class to make playlist files compatible with some music players on Android (i.e. BlackPlayer)"""
 
     def __init__(self):
         itunes_lib_xml_path = os.path.expanduser("~/Music/iTunes/iTunes Music Library.xml")
@@ -61,18 +74,28 @@ class PlaylistParser(object):
         playlist_tracks = [self.tracks[str(t["Track ID"])] for t in playlist["Playlist Items"]]
         return playlist_tracks
 
-    def getM3UForPlaylist(self, playlist):
+    @staticmethod
+    def getM3UForTracks(tracks):
         m3u = ["#EXTM3U"]
-        for track in self.getAudioTracksOfPlaylist(playlist):
+        for track in tracks:
             time = track["Total Time"] / 1000
             name = track["Name"]
             artist = track["Artist"]
             path = urllib2.unquote(track["Location"]).decode("utf8")
             m3u += ["#EXTINF:%d,%s - %s" % (time, name, artist)]
             m3u += [re.sub("^.*/iTunes/iTunes Media/", "", path)]
-            #m3u += [path[7:]]
         m3u += [""] # end with an empty line
         return m3u
+
+    def getM3UForPlaylist(self, playlist):
+        tracks = self.getAudioTracksOfPlaylist(playlist)
+        return PlaylistParser.getM3UForTracks(tracks)
+
+    @staticmethod
+    def writeM3UForTracks(tracks, filename):
+        m3u = PlaylistParser.getM3UForTracks(tracks)
+        with open(filename + ".m3u", "w") as f:
+            f.write('\r'.join(m3u).encode('utf8'))
 
     def writeM3UForPlaylist(self, playlist):
         m3u = self.getM3UForPlaylist(playlist)
@@ -84,6 +107,8 @@ class PlaylistParser(object):
     def writeAllPlaylists(self):
         for playlist in self.getAudioPlaylists():
             self.writeM3UForPlaylist(playlist)
+        PlaylistParser.writeM3UForTracks(SmartPlaylist.recentlyAdded(self.getAudioTracks()), "Recently Added")
+        PlaylistParser.writeM3UForTracks(SmartPlaylist.mostPlayed(self.getAudioTracks()), "Most Played")
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="command line iTunes playlist parser")

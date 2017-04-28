@@ -2,10 +2,6 @@ TODOs
 -----
 * GUI?
   * select playlists to sync
-* better iTunes library XML parsing?
-  * support certain Smart Playlists?
-    * Recently Added
-    * Top 25
 
 `rsync` Compilation References
 ------------------------------
