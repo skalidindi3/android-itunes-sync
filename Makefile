@@ -38,7 +38,7 @@ sync_only: playlists ./bin/rsync-3.1.2-osx
 	@echo "for changes to take effect... try 'adb reboot'\n"
 
 .PHONY: sync
-sync: prep_sync_server sync_only clean_remote_rsync disconnect_sync_server
+sync: prep_sync_server sync_only clean_remote_rsync clean_local disconnect_sync_server
 
 .PHONY: clean_local
 clean_local:
