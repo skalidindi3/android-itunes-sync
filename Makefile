@@ -5,8 +5,8 @@ playlists: clean_local
 .PHONY: check_remote
 check_remote:
 	adb start-server
-	adb shell ls /data/local/tmp/ | cat
-	adb shell ls /sdcard/Music/iTunes/ | cat
+	-adb shell ls /data/local/tmp/
+	-adb shell ls /sdcard/Music/iTunes/
 
 .PHONY: prep_sync_server
 prep_sync_server: ./bin/rsync-3.1.2-androideabi
@@ -18,8 +18,7 @@ prep_sync_server: ./bin/rsync-3.1.2-androideabi
 
 .PHONY: disconnect_sync_server
 disconnect_sync_server:
-	adb shell kill `pgrep rsync` | cat
-	adb forward --remove tcp:6010 | cat
+	-adb forward --remove tcp:6010
 
 .PHONY: changelist
 changelist: prep_sync_server ./bin/rsync-3.1.2-osx
@@ -47,6 +46,7 @@ clean_local:
 
 .PHONY: clean_remote_rsync
 clean_remote_rsync:
+	-adb shell kill `pgrep rsync`
 	adb shell rm -f /data/local/tmp/rsync /data/local/tmp/rsyncd.conf
 
 .PHONY: clean_remote
