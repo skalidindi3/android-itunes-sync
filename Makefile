@@ -31,6 +31,7 @@ changelist: prep_sync_server ./bin/rsync-3.1.2-osx
 .PHONY: sync_only
 sync_only: playlists ./bin/rsync-3.1.2-osx
 	adb shell mkdir -p /sdcard/Music/iTunes/Music/
+	adb push ./*.m3u /sdcard/Music/iTunes/
 	./bin/rsync-3.1.2-osx -rlzi --size-only --delete-before --prune-empty-dirs --info=progress2 \
     ${HOME}/Music/iTunes/iTunes\ Media/Music \
     rsync://localhost:6010/root/sdcard/Music/iTunes/.
